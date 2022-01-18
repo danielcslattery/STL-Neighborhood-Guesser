@@ -52,8 +52,6 @@ namespace STL_Neighborhood_Guesser.Controllers
                 .ToList();
             if (response.Count > 0)
             {
-                Console.WriteLine("Response: " + response[0].Name);
-                Console.WriteLine("Prompt Neighborhood: " + promptNeighborhood.Name);
                 if (response[0].Equals(promptNeighborhood))
                 {
                     //string responseStr = response.Select(x => x.Name).ElementAt(0);
@@ -78,7 +76,6 @@ namespace STL_Neighborhood_Guesser.Controllers
             promptNeighborhood = neighborhoods[rnd.Next(neighborhoods.Count)];
             Console.WriteLine("Initial prompt: " + promptNeighborhood.Name);
             string toGuess = promptNeighborhood.Name;
-
 
             return toGuess;
         }
@@ -109,7 +106,7 @@ namespace STL_Neighborhood_Guesser.Controllers
 
             List<string> hintNeighborhoodNames = hintNeighborhoods.Select(x => x.Name).ToList();
 
-            string eturnString = string.Join(", ", hintNeighborhoodNames);
+            string returnString = string.Join(", ", hintNeighborhoodNames);
 
             return "[" + returnString + "]";
         }
