@@ -24,10 +24,6 @@ namespace STL_Neighborhood_Guesser.Controllers
 
         private NeighborhoodDbContext context;
 
-        // Taken from https://stackoverflow.com/questions/273313/randomize-a-listt
-
-
-
         public NeighborhoodController(NeighborhoodDbContext dbContext)
         {
             context = dbContext;
@@ -40,19 +36,10 @@ namespace STL_Neighborhood_Guesser.Controllers
             List<Neighborhood> neighborhoods = context.Neighborhoods.ToList();
             List<string> neighborhoodsGeoJson = neighborhoods.Select(x => x.GeoJson).ToList();
 
-            /*            string returnString = "{" +
-                                                "\"type\": \"FeatureCollection\", " +
-                                                " \"features\": [";*/
+            string returnString = string.Join(", ", neighborhoodsGeoJson);
 
-            string returnString = "[";
 
-            returnString += string.Join(", ", neighborhoodsGeoJson);
-
-            /*            returnString += "] }";*/
-
-            returnString += "]";
-
-            return returnString;
+            return "[" + returnString + "]";
         }
 
         [Route("click")]
@@ -83,7 +70,7 @@ namespace STL_Neighborhood_Guesser.Controllers
             return "[]";
         }
 
-        // Sets prompt neighborhood and returns its name.
+        // Sets prompt neighborhood and returns its name.  Currently not used, but potentially useful in the future. 
         [Route("GetPrompt")]
         public string NeighborhoodToGuess()
         {
@@ -100,14 +87,18 @@ namespace STL_Neighborhood_Guesser.Controllers
         public string HintNeighborhoods()
         {
             List<Neighborhood> neighborhoods = context.Neighborhoods.ToList();
-            List<Neighborhood> hintNeighborhoods = new List<Neighborhood>();
-
-
-            while (hintNeighborhoods.Count < 5)
+            promptNeighborhood = neighborhoods[rnd.Next(neighborhoods.Count)];
+            List<Neighborhood> hintNeighborhoods = new List<Neighborhood>()
             {
-                // Get random neighborhood and check that its not the promptNeighborhood
+                promptNeighborhood
+            };
+
+
+            while (hintNeighborhoods.Count < 6)
+            {
+                // Get random neighborhood and check that its not yet in the list
                 Neighborhood nextNeighborhood = neighborhoods[rnd.Next(neighborhoods.Count)];
-                if (!hintNeighborhoods.Contains(nextNeighborhood) && !nextNeighborhood.Equals(promptNeighborhood))
+                if (!hintNeighborhoods.Contains(nextNeighborhood))
                 {
                     hintNeighborhoods.Add(neighborhoods[rnd.Next(neighborhoods.Count)]);
                 } else
@@ -116,20 +107,11 @@ namespace STL_Neighborhood_Guesser.Controllers
                 }   
             }
 
-            hintNeighborhoods.Insert(rnd.Next(5),promptNeighborhood);
-
-
             List<string> hintNeighborhoodNames = hintNeighborhoods.Select(x => x.Name).ToList();
 
-            string returnString = "[";
+            string eturnString = string.Join(", ", hintNeighborhoodNames);
 
-            returnString += string.Join(", ", hintNeighborhoodNames);
-
-            /*            returnString += "] }";*/
-
-            returnString += "]";
-
-            return returnString;
+            return "[" + returnString + "]";
         }
     }
 }

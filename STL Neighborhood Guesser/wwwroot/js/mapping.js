@@ -1,4 +1,8 @@
 ﻿
+
+
+
+// Map Settings
 var map = L.map('map').setView([38.63457282385875, -90.24032592773438], 11);
 
 var Esri_WorldTopoMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
@@ -14,7 +18,13 @@ map.options.minZoom = 11;
 map.options.maxZoom = 14;
 
 
+// Function calls and Variable Initialization
+let formerGuesses = []
+onStart();
+map.on('click', onMapClick);
 
+
+// Fuctions
 async function getNeighborhoods() {
 	const response = await fetch('https://localhost:5001/neighborhood/all');
 	const myJson = await response.json(); //extract JSON from the http response
@@ -33,6 +43,7 @@ async function getNeighborhoods() {
 			})
 
 			layer.on({
+				click: onNeighborhoodClick,
 				mouseover: onNeighborhoodHover,
 				mouseout: offNeighborhoodHover
 			})
@@ -48,23 +59,15 @@ async function onStart() {
 
 	// neighborhoodGroup layer placed into globalscope
 	neighborhoodGroup = await getNeighborhoods();
-	await setPrompt();
+/*	await setPromptAndHighlightHints();*/
 
 	highlightHints(neighborhoodGroup);
-
-
-
 }
 
-onStart();
 
-async function setPrompt() {
-	const response = await fetch(`https://localhost:5001/neighborhood/getPrompt`);
-	const prompt = await response.json();
-
-	let promptEl = document.getElementById("prompt");
-	promptEl.innerHTML = prompt;
-
+function onNeighborhoodClick(e) {
+	formerGuesses.push(e.target.feature.properties.NHD_NAME)
+	e.target.setStyle({ fillColor: "red" })
 }
 
 function onNeighborhoodHover(e) {
@@ -73,12 +76,12 @@ function onNeighborhoodHover(e) {
 
 function offNeighborhoodHover(e) {
 
-	// If the neighborhood is one of the hints, return it to yellow. 
-	if (hintJson.some((el) => e.target.feature.properties.NHD_NAME == el)) {
-
+	// If the neighborhood is one of the hints, return it to yellow.
+	if (formerGuesses.some((el) => e.target.feature.properties.NHD_NAME == el)) {
+		e.target.setStyle({ fillColor: "red" })
+	} else if (hintJson.some((el) => e.target.feature.properties.NHD_NAME == el)) {
 		e.target.setStyle({ fillColor: "yellow" })
-
-	} else {
+    } else {
 		// Reset layers
 		e.target.setStyle({ fillColor: "darkgray" })
 	}
@@ -88,19 +91,22 @@ function offNeighborhoodHover(e) {
 
 var popup = L.popup()
 
-	async function onMapClick(e) {
-		console.log("Longitude: ", e.latlng.lng, " Latitude: ", e.latlng.lat)
+async function onMapClick(e) {
 
-		let clickedOn = await getClickedNeighborhood(e.latlng.lng, e.latlng.lat);
+	let clickedOn = await getClickedNeighborhood(e.latlng.lng, e.latlng.lat);
 
-		if (clickedOn == "Correct") {
-			console.log("Got it right!")
-			setPrompt();
-			highlightHints(neighborhoodGroup);
-		} else {
-			//do nothing for now
-		}
+	if (clickedOn == "Correct") {
+		console.log("Got it right!")
+		// Reset formerGuesses
+		formerGuesses = [];
+/*			setPrompt();*/
+		highlightHints(neighborhoodGroup);
+
+	} else {
+/*		formerGuesses.push(clickedOn)
+		console.log("Added to guesses", formerGuesses)*/
 	}
+}
 
 async function getClickedNeighborhood(lon, lat) {
 	const response = await fetch(`https://localhost:5001/neighborhood/click?lon=${lon}&lat=${lat}`);
@@ -128,8 +134,11 @@ async function highlightHints(feature) {
 			// Reset layers
 			layer.setStyle({ fillColor: "darkgray" })
         }
-    })
+	})
+
+	let promptEl = document.getElementById("prompt");
+	// The first item in the hintJson is the neighborhood prompt. 
+	promptEl.innerHTML = hintJson[0];
 
 }
 
-map.on('click', onMapClick);
