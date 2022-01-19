@@ -2,7 +2,7 @@
 
 
 
-// Map Settings
+// Map Settings 2
 var map = L.map('map', {attributionControl: false}).setView([38.63457282385875, -90.24032592773438], 11);
 
 var Esri_WorldTopoMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}').addTo(map);
