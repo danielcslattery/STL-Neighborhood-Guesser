@@ -74,7 +74,6 @@ namespace STL_Neighborhood_Guesser.Controllers
         {
             List<Neighborhood> neighborhoods = context.Neighborhoods.ToList();
             promptNeighborhood = neighborhoods[rnd.Next(neighborhoods.Count)];
-            Console.WriteLine("Initial prompt: " + promptNeighborhood.Name);
             string toGuess = promptNeighborhood.Name;
 
             return toGuess;

@@ -3,11 +3,9 @@
 
 
 // Map Settings
-var map = L.map('map').setView([38.63457282385875, -90.24032592773438], 11);
+var map = L.map('map', {attributionControl: false}).setView([38.63457282385875, -90.24032592773438], 11);
 
-var Esri_WorldTopoMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-	attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
-}).addTo(map);
+var Esri_WorldTopoMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
 map.setMaxBounds(L.latLngBounds(
 	L.latLng(38.77817551784403, -89.99107360839845),

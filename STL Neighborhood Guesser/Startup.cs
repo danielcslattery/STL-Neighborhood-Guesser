@@ -44,8 +44,6 @@ namespace STL_Neighborhood_Guesser
                 app.UseDeveloperExceptionPage();
             }
 
-
-
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
