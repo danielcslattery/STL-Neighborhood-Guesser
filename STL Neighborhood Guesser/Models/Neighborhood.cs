@@ -3,7 +3,6 @@
 using STL_Neighborhood_Guesser.Controllers;
 using System;
 using System.Collections.Generic;
-using System.Spatial;
 
 namespace STL_Neighborhood_Guesser.Models
 {
