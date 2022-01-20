@@ -30,8 +30,8 @@ namespace STL_Neighborhood_Guesser
             services.AddCors();
             services.AddControllers();
             services.AddMvc(options => options.EnableEndpointRouting = false);
-            /*            services.AddDbContext<NeighborhoodDbContext>(options =>
-                            options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));*/
+/*            services.AddDbContext<NeighborhoodDbContext>(options =>
+                options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));*/
             services.AddRazorPages();
 
 
@@ -51,6 +51,7 @@ namespace STL_Neighborhood_Guesser
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseCors(builder => builder

@@ -17,10 +17,10 @@ namespace STL_Neighborhood_Guesser.Areas.Identity
         {
             builder.ConfigureServices((context, services) => {
                 services.AddDbContext<NeighborhoodDbContext>(options =>
-                    options.UseSqlServer(
+                    options.UseMySql(
                         context.Configuration.GetConnectionString("DefaultConnection")));
 
-                services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
                     .AddEntityFrameworkStores<NeighborhoodDbContext>();
             });
         }
