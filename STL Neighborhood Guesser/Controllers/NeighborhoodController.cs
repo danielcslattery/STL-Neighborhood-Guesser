@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace STL_Neighborhood_Guesser.Controllers
 {
@@ -21,12 +23,14 @@ namespace STL_Neighborhood_Guesser.Controllers
         // Create random number generator for prompt/hints.
         private static Random rnd = new Random();
         private static Neighborhood promptNeighborhood;
-
+        private readonly UserManager<IdentityUser> _userManager;
         private NeighborhoodDbContext context;
 
-        public NeighborhoodController(NeighborhoodDbContext dbContext)
+        public NeighborhoodController(  NeighborhoodDbContext dbContext,
+                                        UserManager<IdentityUser> userManager)
         {
             context = dbContext;
+            _userManager = userManager;
         }
 
         [EnableCors]
@@ -54,7 +58,11 @@ namespace STL_Neighborhood_Guesser.Controllers
             {
                 if (response[0].Equals(promptNeighborhood))
                 {
-                    //string responseStr = response.Select(x => x.Name).ElementAt(0);
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+
+                    Score userScore = context.Scores.Where(x => x.UserId == userId).First();
+                    userScore.Points += 1;
+                    context.SaveChanges();
 
                     return "[\"Correct\"]";
                 } else
@@ -109,5 +117,41 @@ namespace STL_Neighborhood_Guesser.Controllers
 
             return "[" + returnString + "]";
         }
+
+
+        [Route("Score")]
+        public int GetScore()
+        {
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+
+            if (userId != null)
+            {
+                IQueryable<Score> scores = context.Scores.Where(x => x.UserId == userId);
+                // If the user doesn't have a score in the table yet, add them
+                if (! scores.Any())
+                {
+
+                    Score newUserScore = new Score()
+                    {
+                        UserId = userId,
+                        Points = 0,
+                        Attempts = 0
+                    };
+                    context.Scores.Add(newUserScore);
+                    context.SaveChanges();
+
+                    return newUserScore.Points;
+                }
+
+                Score userScore = context.Scores.Where(x => x.UserId == userId).First();
+
+                return userScore.Points;
+            }
+
+            return 0;
+
+        }
+
     }
 }

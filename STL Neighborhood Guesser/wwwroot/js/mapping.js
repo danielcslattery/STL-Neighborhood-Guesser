@@ -57,9 +57,19 @@ async function onStart() {
 
 	// neighborhoodGroup layer placed into globalscope
 	neighborhoodGroup = await getNeighborhoods();
-/*	await setPromptAndHighlightHints();*/
 
 	highlightHints(neighborhoodGroup);
+
+	getScore();
+
+}
+
+async function getScore() {
+	const response = await fetch(`https://localhost:5001/neighborhood/score`);
+	const myJson = await response.json();
+	console.log(myJson)
+	let scoreEl = document.getElementById("score");
+	scoreEl.innerHTML = myJson;
 }
 
 
@@ -104,6 +114,8 @@ async function onMapClick(e) {
 /*		formerGuesses.push(clickedOn)
 		console.log("Added to guesses", formerGuesses)*/
 	}
+
+	getScore();
 }
 
 async function getClickedNeighborhood(lon, lat) {

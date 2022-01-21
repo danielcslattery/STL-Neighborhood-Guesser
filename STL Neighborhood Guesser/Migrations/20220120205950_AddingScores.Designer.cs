@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STL_Neighborhood_Guesser.Data;
 
 namespace STL_Neighborhood_Guesser.Migrations
 {
     [DbContext(typeof(NeighborhoodDbContext))]
-    partial class NeighborhoodDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220120205950_AddingScores")]
+    partial class AddingScores
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

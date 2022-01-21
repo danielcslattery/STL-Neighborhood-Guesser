@@ -8,6 +8,7 @@ namespace STL_Neighborhood_Guesser.Data
     public class NeighborhoodDbContext : IdentityDbContext<IdentityUser>
     {
         public DbSet<Neighborhood> Neighborhoods { get; set; }
+        public DbSet<Score> Scores { get; set; }
 
         public NeighborhoodDbContext(DbContextOptions<NeighborhoodDbContext> options)
         : base(options)
