@@ -60,9 +60,14 @@ namespace STL_Neighborhood_Guesser.Controllers
                 {
                     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
 
-                    Score userScore = context.Scores.Where(x => x.UserId == userId).First();
-                    userScore.Points += 1;
-                    context.SaveChanges();
+                    IQueryable<Score> scores = context.Scores.Where(x => x.UserId == userId);
+                    // If the user doesn't have a score in the table yet, add them
+                    if (scores.Any())
+                    {
+                        scores.First().Points += 1;
+                        context.SaveChanges();
+                    }
+
 
                     return "[\"Correct\"]";
                 } else
