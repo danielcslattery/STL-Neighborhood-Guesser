@@ -2,10 +2,22 @@
     height: 500px;
     width: 800px;
     margin: auto;
-    border-radius: 25px;
+    border-radius: 15px;
+    display: inline-block;
 }
 
 
 #prompt {
 
+}
+
+#scoreBox {
+    display: inline-block;
+    margin: auto;
+    background-color: #28c748;
+    border-radius: 15px;
+    padding: 10px;
+    width: 200px;
+    color: white;
+    vertical-align: top;
 }

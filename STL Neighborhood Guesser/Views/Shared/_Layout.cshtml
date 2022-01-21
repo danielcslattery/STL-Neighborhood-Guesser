@@ -5,13 +5,27 @@
 <head>
     <meta name="viewport" content="width=device-width" />
 @*    <title>Page Title</title>*@
+
+	<link rel="stylesheet" href="~/CSS/_Layout.css">
 </head>
 <body>
-    <partial name="_LoginPartial" />
-    <div>
+    <header id = "navbar">
+        <nav class="nav-container">
+            <h1 id = "navbar-title">STL Neighborhood Guesser</h1>
+            <partial id = "loginPartial" name="_LoginPartial" />
+        </nav>
+    </header>
+
+    <div id = "gameContent">
         @RenderBody()
     </div>
         @RenderSection("Scripts", required: false)
+
+<footer id="sign-off">
+    <span id="sign-off-text">
+        <p>&#169 Daniel Slattery &#8226 St. Louis, MO</p>
+    </span>
+</footer>
 
 </body>
 </html>
