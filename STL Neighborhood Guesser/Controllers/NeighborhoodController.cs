@@ -65,6 +65,7 @@ namespace STL_Neighborhood_Guesser.Controllers
                     if (scores.Any())
                     {
                         scores.First().Points += 1;
+                        scores.First().Attempts += 1;
                         context.SaveChanges();
                     }
 
@@ -125,7 +126,7 @@ namespace STL_Neighborhood_Guesser.Controllers
 
 
         [Route("Score")]
-        public int GetScore()
+        public Score GetScore()
         {
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
@@ -146,15 +147,15 @@ namespace STL_Neighborhood_Guesser.Controllers
                     context.Scores.Add(newUserScore);
                     context.SaveChanges();
 
-                    return newUserScore.Points;
+                    return newUserScore;
                 }
 
                 Score userScore = context.Scores.Where(x => x.UserId == userId).First();
 
-                return userScore.Points;
+                return userScore;
             }
 
-            return 0;
+            return new Score();
 
         }
 
