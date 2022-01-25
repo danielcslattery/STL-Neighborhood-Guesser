@@ -17,15 +17,27 @@
 
 </head>
 	<body>
+
 		<div id = "scoreBox">
 			<label>
 				Where is:
 			</label>
 			<p id = "prompt"></p>
-			<label>
-				Score
-			</label>
-			<p id = "score"></p> 
+
+			@if (ViewBag.LoggedIn){
+				<label>
+					Correct
+				</label>
+				<p id = "points"></p> 
+				<label>
+					Guesses
+				</label>
+			<p id = "attempts"></p>
+			} else
+			{
+				<p>Log in to see score.</p>
+			}
+
 		</div>
 
 		<div id = "map"></div>

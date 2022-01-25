@@ -23,14 +23,11 @@ namespace STL_Neighborhood_Guesser.Controllers
         // Create random number generator for prompt/hints.
         private static Random rnd = new Random();
         private static Neighborhood promptNeighborhood;
-        private readonly UserManager<IdentityUser> _userManager;
         private NeighborhoodDbContext context;
 
-        public NeighborhoodController(  NeighborhoodDbContext dbContext,
-                                        UserManager<IdentityUser> userManager)
+        public NeighborhoodController(  NeighborhoodDbContext dbContext)
         {
             context = dbContext;
-            _userManager = userManager;
         }
 
         [EnableCors]
@@ -42,13 +39,13 @@ namespace STL_Neighborhood_Guesser.Controllers
 
             string returnString = string.Join(", ", neighborhoodsGeoJson);
 
-
             return "[" + returnString + "]";
         }
 
         [Route("click")]
         public string Guess(double lon, double lat)
         {
+            // st_contains will never return more than a single row
             List<Neighborhood> response = context.Neighborhoods
                 .FromSqlRaw("SELECT * " +
                 "FROM neighborhoods " +
@@ -56,22 +53,29 @@ namespace STL_Neighborhood_Guesser.Controllers
                 .ToList();
             if (response.Count > 0)
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+
+                IQueryable<Score> scores = context.Scores.Where(x => x.UserId == userId);
+                // If the user doesn't have a score in the table yet, add them
+
                 if (response[0].Equals(promptNeighborhood))
                 {
-                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
-
-                    IQueryable<Score> scores = context.Scores.Where(x => x.UserId == userId);
-                    // If the user doesn't have a score in the table yet, add them
                     if (scores.Any())
                     {
                         scores.First().Points += 1;
+                        scores.First().Attempts += 1;
                         context.SaveChanges();
                     }
-
 
                     return "[\"Correct\"]";
                 } else
                 {
+                    if (scores.Any())
+                    {
+                        scores.First().Attempts += 1;
+                        context.SaveChanges();
+                    }
+
                     return "[\"Incorrect\"]";
                 }
 
@@ -92,10 +96,15 @@ namespace STL_Neighborhood_Guesser.Controllers
             return toGuess;
         }
 
+
+        // Retrieve prompt neighborhood (the one to be guessed) and make it first in the list of hint neighborhoods.
+        // The front end uses the first item in the list as the prompt neighborhood.
+        // The method only returns a string, so it doesn't matter the order of neighborhoods.
         [Route("GetHints")]
         public string HintNeighborhoods()
         {
             List<Neighborhood> neighborhoods = context.Neighborhoods.ToList();
+
             promptNeighborhood = neighborhoods[rnd.Next(neighborhoods.Count)];
             List<Neighborhood> hintNeighborhoods = new List<Neighborhood>()
             {
@@ -123,12 +132,12 @@ namespace STL_Neighborhood_Guesser.Controllers
             return "[" + returnString + "]";
         }
 
-
+        // Retrieve user's score from Score table using the userId when they log in.  New users have a blank score instantiated.
         [Route("Score")]
-        public int GetScore()
+        public Score GetScore()
         {
-
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+           
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId != null)
             {
@@ -146,15 +155,15 @@ namespace STL_Neighborhood_Guesser.Controllers
                     context.Scores.Add(newUserScore);
                     context.SaveChanges();
 
-                    return newUserScore.Points;
+                    return newUserScore;
                 }
 
                 Score userScore = context.Scores.Where(x => x.UserId == userId).First();
 
-                return userScore.Points;
+                return userScore;
             }
 
-            return 0;
+            return new Score();
 
         }
 

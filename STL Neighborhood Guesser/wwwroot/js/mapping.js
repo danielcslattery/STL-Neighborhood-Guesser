@@ -19,7 +19,7 @@ map.options.maxZoom = 14;
 // Function calls and Variable Initialization
 let formerGuesses = []
 onStart();
-map.on('click', onMapClick);
+/*map.on('click', onMapClick);*/
 
 
 // Fuctions
@@ -58,7 +58,7 @@ async function onStart() {
 	// neighborhoodGroup layer placed into globalscope
 	neighborhoodGroup = await getNeighborhoods();
 
-	highlightHints(neighborhoodGroup);
+	await highlightHints();
 
 	getScore();
 
@@ -66,16 +66,39 @@ async function onStart() {
 
 async function getScore() {
 	const response = await fetch(`https://localhost:5001/neighborhood/score`);
-	const myJson = await response.json();
-	console.log(myJson)
-	let scoreEl = document.getElementById("score");
-	scoreEl.innerHTML = myJson;
+	const scoreJson = await response.json();
+	console.log(scoreJson)
+
+
+	let pointsEl = document.getElementById("points");
+	pointsEl.innerHTML = scoreJson.points;
+
+	let attemptsEl = document.getElementById("attempts");
+	attemptsEl.innerHTML = scoreJson.attempts;
 }
 
 
-function onNeighborhoodClick(e) {
-	formerGuesses.push(e.target.feature.properties.NHD_NAME)
-	e.target.setStyle({ fillColor: "red" })
+async function onNeighborhoodClick(e) {
+
+	console.log("Check if in hints: ", hintJson.some(el => el == e.target.feature.properties.NHD_NAME))
+
+	if (hintJson.some(el => el == e.target.feature.properties.NHD_NAME)) {
+		formerGuesses.push(e.target.feature.properties.NHD_NAME)
+		console.log(e.latlng.lng, e.latlng.lat);
+		let clickedOn = await checkCliickedNeighborhoods(e.latlng.lng, e.latlng.lat);
+		console.log("Server response to click: ", clickedOn)
+		if (clickedOn == "Correct") {
+			console.log("Got it right!")
+			// Reset formerGuesses
+			formerGuesses = [];
+			highlightHints(neighborhoodGroup);
+
+		} else {
+			e.target.setStyle({ fillColor: "red" })
+		}
+
+		getScore();
+    }
 }
 
 function onNeighborhoodHover(e) {
@@ -94,35 +117,15 @@ function offNeighborhoodHover(e) {
 		e.target.setStyle({ fillColor: "darkgray" })
 	}
 
-
 }
 
 var popup = L.popup()
 
-async function onMapClick(e) {
-
-	let clickedOn = await getClickedNeighborhood(e.latlng.lng, e.latlng.lat);
-
-	if (clickedOn == "Correct") {
-		console.log("Got it right!")
-		// Reset formerGuesses
-		formerGuesses = [];
-/*			setPrompt();*/
-		highlightHints(neighborhoodGroup);
-
-	} else {
-/*		formerGuesses.push(clickedOn)
-		console.log("Added to guesses", formerGuesses)*/
-	}
-
-	getScore();
-}
-
-async function getClickedNeighborhood(lon, lat) {
+async function checkCliickedNeighborhoods(lon, lat) {
 	const response = await fetch(`https://localhost:5001/neighborhood/click?lon=${lon}&lat=${lat}`);
-	const myJson = await response.json();
+	const responseJson = await response.json();
 
-	return myJson;
+	return responseJson;
 }
 
 async function getHintNeighborhoods() {
@@ -132,12 +135,12 @@ async function getHintNeighborhoods() {
 	return hintJson;
 }
 
-async function highlightHints(feature) {
+async function highlightHints() {
 
 	// Hint neighborhoods made placed into global scope.
 	hintJson = await getHintNeighborhoods();
 	console.log(hintJson)
-	feature.eachLayer(function (layer) {
+	neighborhoodGroup.eachLayer(function (layer) {
 		if (hintJson.some((el) => layer.feature.properties.NHD_NAME == el)) {
 			layer.setStyle({ fillColor: "yellow" })
 		} else {
