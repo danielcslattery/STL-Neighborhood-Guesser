@@ -1,16 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using STL_Neighborhood_Guesser.Data;
 using STL_Neighborhood_Guesser.Models;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Cors;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace STL_Neighborhood_Guesser.Controllers
 {
@@ -29,7 +23,7 @@ namespace STL_Neighborhood_Guesser.Controllers
             context = dbContext;
         }
 
-        public static string ProcessGuess(List<Neighborhood> response,
+        private static string ProcessGuess(List<Neighborhood> response,
                                         NeighborhoodDbContext context,
                                         string userId)
         {
@@ -50,7 +44,7 @@ namespace STL_Neighborhood_Guesser.Controllers
             }
         }
 
-        public static List<Neighborhood> GetHintNeighborhoods(NeighborhoodDbContext context)
+        private static List<Neighborhood> GetHintNeighborhoods(NeighborhoodDbContext context)
         {
             List<Neighborhood> neighborhoods = context.Neighborhoods.ToList();
 
@@ -78,7 +72,7 @@ namespace STL_Neighborhood_Guesser.Controllers
             return hintNeighborhoods;
         }
 
-        public static void IncrementScore(IQueryable<Score> scores,
+        private static void IncrementScore(IQueryable<Score> scores,
                                          NeighborhoodDbContext context)
         {
             if (scores.Any())
@@ -89,7 +83,7 @@ namespace STL_Neighborhood_Guesser.Controllers
             }
         }
 
-        public static void IncrementAttempts(IQueryable<Score> scores,
+        private static void IncrementAttempts(IQueryable<Score> scores,
                                          NeighborhoodDbContext context)
         {
             if (scores.Any())
