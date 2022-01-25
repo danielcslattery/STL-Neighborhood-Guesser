@@ -19,7 +19,7 @@ map.options.maxZoom = 14;
 // Function calls and Variable Initialization
 let formerGuesses = []
 onStart();
-map.on('click', onMapClick);
+/*map.on('click', onMapClick);*/
 
 
 // Fuctions
@@ -78,9 +78,27 @@ async function getScore() {
 }
 
 
-function onNeighborhoodClick(e) {
-	formerGuesses.push(e.target.feature.properties.NHD_NAME)
-	e.target.setStyle({ fillColor: "red" })
+async function onNeighborhoodClick(e) {
+
+	console.log("Check if in hints: ", hintJson.some(el => el == e.target.feature.properties.NHD_NAME))
+
+	if (hintJson.some(el => el == e.target.feature.properties.NHD_NAME)) {
+		formerGuesses.push(e.target.feature.properties.NHD_NAME)
+		console.log(e.latlng.lng, e.latlng.lat);
+		let clickedOn = await checkCliickedNeighborhoods(e.latlng.lng, e.latlng.lat);
+		console.log("Server response to click: ", clickedOn)
+		if (clickedOn == "Correct") {
+			console.log("Got it right!")
+			// Reset formerGuesses
+			formerGuesses = [];
+			highlightHints(neighborhoodGroup);
+
+		} else {
+			e.target.setStyle({ fillColor: "red" })
+		}
+
+		getScore();
+    }
 }
 
 function onNeighborhoodHover(e) {
@@ -99,25 +117,9 @@ function offNeighborhoodHover(e) {
 		e.target.setStyle({ fillColor: "darkgray" })
 	}
 
-
 }
 
 var popup = L.popup()
-
-async function onMapClick(e) {
-
-	let clickedOn = await checkCliickedNeighborhoods(e.latlng.lng, e.latlng.lat);
-
-	if (clickedOn == "Correct") {
-		console.log("Got it right!")
-		// Reset formerGuesses
-		formerGuesses = [];
-		highlightHints(neighborhoodGroup);
-
-	}
-
-	getScore();
-}
 
 async function checkCliickedNeighborhoods(lon, lat) {
 	const response = await fetch(`https://localhost:5001/neighborhood/click?lon=${lon}&lat=${lat}`);
