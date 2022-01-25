@@ -80,15 +80,11 @@ async function getScore() {
 
 async function onNeighborhoodClick(e) {
 
-	console.log("Check if in hints: ", hintJson.some(el => el == e.target.feature.properties.NHD_NAME))
-
 	if (hintJson.some(el => el == e.target.feature.properties.NHD_NAME)) {
 		formerGuesses.push(e.target.feature.properties.NHD_NAME)
-		console.log(e.latlng.lng, e.latlng.lat);
 		let clickedOn = await checkCliickedNeighborhoods(e.latlng.lng, e.latlng.lat);
 		console.log("Server response to click: ", clickedOn)
 		if (clickedOn == "Correct") {
-			console.log("Got it right!")
 			// Reset formerGuesses
 			formerGuesses = [];
 			highlightHints(neighborhoodGroup);
@@ -139,7 +135,7 @@ async function highlightHints() {
 
 	// Hint neighborhoods made placed into global scope.
 	hintJson = await getHintNeighborhoods();
-	console.log(hintJson)
+
 	neighborhoodGroup.eachLayer(function (layer) {
 		if (hintJson.some((el) => layer.feature.properties.NHD_NAME == el)) {
 			layer.setStyle({ fillColor: "yellow" })
