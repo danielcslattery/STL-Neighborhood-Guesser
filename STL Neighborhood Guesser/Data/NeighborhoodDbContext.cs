@@ -35,6 +35,4 @@ namespace STL_Neighborhood_Guesser.Data
             return response;
         }
     }
-
-
 }
