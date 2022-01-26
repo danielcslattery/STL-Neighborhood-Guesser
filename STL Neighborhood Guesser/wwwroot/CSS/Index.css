@@ -21,3 +21,8 @@
     color: white;
     vertical-align: top;
 }
+
+.leaflet-tooltip {
+    width: 250px;
+    white-space: normal;
+}

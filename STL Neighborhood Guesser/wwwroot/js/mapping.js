@@ -60,8 +60,40 @@ async function onStart() {
 
 	await highlightHints();
 
+	addPromptNeighborhoodPopUp();
+
 	getScore();
 
+}
+
+function removeToolTips() {
+	map.eachLayer(function (layer) {
+		if (layer.options.pane === "tooltipPane") layer.removeFrom(map);
+	});
+}
+
+function addPromptNeighborhoodPopUp() {
+	let count = 1
+
+	neighborhoodGroup.eachLayer(function (layer) {
+		if (layer.feature.properties.NHD_NAME == hintJson[0]){
+			layer.bindTooltip("Clicked here on the " + hintJson[0] + " to recieve a point if logged in.",
+				{ permanent: true }
+			)
+			layer.openTooltip()
+			layer.on('click', removeToolTips)
+		}
+
+		if (hintJson.some((el) => layer.feature.properties.NHD_NAME == el) &&
+			layer.feature.properties.NHD_NAME != hintJson[0] &&
+			count == 1) {
+			layer.bindTooltip(`Some neighborhoods, including the neighborhood to guess,
+				are highlighted in yellow to give you hints.`,
+				{ permanent: true })
+			layer.openTooltip()
+			count--
+		}
+	})
 }
 
 async function getScore() {
