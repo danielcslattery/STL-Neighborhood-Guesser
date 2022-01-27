@@ -49,7 +49,5 @@ namespace STL_Neighborhood_Guesser.Controllers
         {
             return _neighborhoodService.ProcessScore();
         }
-
-
     }
 }
