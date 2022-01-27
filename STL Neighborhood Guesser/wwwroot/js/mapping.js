@@ -60,24 +60,25 @@ async function onStart() {
 
 	await highlightHints();
 
-	addPromptNeighborhoodPopUp();
+	addInstructionalToolTips();
 
 	getScore();
 
 }
 
+// Removes instructional tooltips, used when user clicks on the prompted neighborhood
 function removeToolTips() {
 	map.eachLayer(function (layer) {
 		if (layer.options.pane === "tooltipPane") layer.removeFrom(map);
 	});
 }
 
-function addPromptNeighborhoodPopUp() {
+function addInstructionalToolTips() {
 	let count = 1
 
 	neighborhoodGroup.eachLayer(function (layer) {
 		if (layer.feature.properties.NHD_NAME == hintJson[0]){
-			layer.bindTooltip("Clicked here on the " + hintJson[0] + " to recieve a point if logged in.",
+			layer.bindTooltip("Clicked here on " + hintJson[0] + " to recieve a point if logged in.",
 				{ permanent: true }
 			)
 			layer.openTooltip()
@@ -109,7 +110,8 @@ async function getScore() {
 	attemptsEl.innerHTML = scoreJson.attempts;
 }
 
-
+// When a neighborhood is clicked, turn it red if its not the answer, move to next neighborhood challenge if correct
+// Neighborhoods that are not in the set of hints do not react to clicks.
 async function onNeighborhoodClick(e) {
 
 	if (hintJson.some(el => el == e.target.feature.properties.NHD_NAME)) {
@@ -146,8 +148,6 @@ function offNeighborhoodHover(e) {
 	}
 
 }
-
-var popup = L.popup()
 
 async function checkCliickedNeighborhoods(lon, lat) {
 	const response = await fetch(`https://localhost:5001/neighborhood/click?lon=${lon}&lat=${lat}`);

@@ -13,9 +13,6 @@ namespace STL_Neighborhood_Guesser.Controllers
     [Route("Neighborhood")]
     public class NeighborhoodController : ControllerBase
     {
-
-        // Create random number generator for prompt/hints.
-        private static Random rnd = new Random();
         private INeighborhoodService _neighborhoodService;
 
         public NeighborhoodController(INeighborhoodService neighborhoodService)
@@ -37,9 +34,6 @@ namespace STL_Neighborhood_Guesser.Controllers
         }
 
 
-        // Retrieve prompt neighborhood (the one to be guessed) and make it first in the list of hint neighborhoods.
-        // The front end uses the first item in the list as the prompt neighborhood.
-        // The method only returns a string, so it doesn't matter the order of neighborhoods.
         [Route("GetHints")]
         public string HintNeighborhoods()
         {
@@ -50,7 +44,6 @@ namespace STL_Neighborhood_Guesser.Controllers
             return "[" + string.Join(", ", hintNeighborhoodNames) + "]";
         }
 
-        // Retrieve user's score from Score table using the userId when they log in.  New users have a blank score instantiated.
         [Route("Score")]
         public Score GetScore()
         {

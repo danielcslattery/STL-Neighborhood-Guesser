@@ -22,6 +22,7 @@ namespace STL_Neighborhood_Guesser.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
+        // Return all neighborhoods as a List of GeoJSON
         public List<string> GetAll()
         {
             List<Neighborhood> neighborhoods = context.Neighborhoods.ToList();
@@ -30,6 +31,8 @@ namespace STL_Neighborhood_Guesser.Services
             return neighborhoodsGeoJson;
         }
 
+        // Randomly choose the prompt neighborhood and five more to act as hints and return their names.
+        // The prompt neighborhood is always first, so the frontend knows which neighborhood to use.  
         public List<Neighborhood> GetHintNeighborhoods()
         {
             List<Neighborhood> neighborhoods = context.Neighborhoods.ToList();
@@ -58,7 +61,8 @@ namespace STL_Neighborhood_Guesser.Services
             return hintNeighborhoods;
         }
 
-
+        // Given the latitude and longitude where a user clicked, check which neighborhood they clicked and if it matches the prompt
+        // New users scores are handled on registration, so the logged-in user is assumed to have one here.  
         public string ProcessGuess(double lon, double lat)
         {
             List<Neighborhood> response = context.CheckClickLocation(lon, lat);
@@ -67,7 +71,6 @@ namespace STL_Neighborhood_Guesser.Services
             {
                 string userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
                 IQueryable<Score> scores = context.Scores.Where(x => x.UserId == userId);
-                // If the user doesn't have a score in the table yet, add them
 
                 if (response[0].Equals(promptNeighborhood))
                 {
@@ -105,7 +108,8 @@ namespace STL_Neighborhood_Guesser.Services
             }
         }
 
-
+        // On page load, check if the user is logged in, return their score.  If they are not logged in return blank Score object.
+        // If a user is new, create a new Score object for them with their unique Id.  
         public Score ProcessScore()
         {
             string userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
