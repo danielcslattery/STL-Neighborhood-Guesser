@@ -38,6 +38,7 @@ namespace STL_Neighborhood_Guesser.Services
             List<Neighborhood> neighborhoods = context.Neighborhoods.ToList();
 
             promptNeighborhood = neighborhoods[rnd.Next(neighborhoods.Count)];
+
             List<Neighborhood> hintNeighborhoods = new List<Neighborhood>()
             {
                 promptNeighborhood
@@ -48,13 +49,10 @@ namespace STL_Neighborhood_Guesser.Services
             {
                 // Get random neighborhood and check that its not yet in the list
                 Neighborhood nextNeighborhood = neighborhoods[rnd.Next(neighborhoods.Count)];
+
                 if (!hintNeighborhoods.Contains(nextNeighborhood))
                 {
-                    hintNeighborhoods.Add(neighborhoods[rnd.Next(neighborhoods.Count)]);
-                }
-                else
-                {
-                    //Do nothing
+                    hintNeighborhoods.Add(nextNeighborhood);
                 }
             }
 
@@ -63,49 +61,41 @@ namespace STL_Neighborhood_Guesser.Services
 
         // Given the latitude and longitude where a user clicked, check which neighborhood they clicked and if it matches the prompt
         // New users scores are handled on registration, so the logged-in user is assumed to have one here.  
-        public string ProcessGuess(double lon, double lat)
+        public bool ProcessGuess(double lon, double lat)
         {
             List<Neighborhood> response = context.CheckClickLocation(lon, lat);
 
-            if (response.Count > 0)
+            // Client should not make requests that return a neighborhood list not equal to 1
+            if (response.Count != 1)
             {
-                string userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                IQueryable<Score> scores = context.Scores.Where(x => x.UserId == userId);
-
-                if (response[0].Equals(promptNeighborhood))
-                {
-                    IncrementScore(scores);
-
-                    return "[\"Correct\"]";
-                }
-                else
-                {
-                    IncrementAttempts(scores);
-
-                    return "[\"Incorrect\"]";
-                }
+                throw new Exception();
             }
-            //Send empty json as return
-            return "[]";
+
+            Console.WriteLine(response[0].Name);
+            Console.WriteLine(promptNeighborhood.Name);
+
+            string userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            IQueryable<Score> scores = context.Scores.Where(x => x.UserId == userId);
+
+            if (scores.Any())
+            {
+                IncrementScore(scores, response[0].Equals(promptNeighborhood));
+            }
+
+
+            return response[0].Equals(promptNeighborhood);
+
         }
 
-        public void IncrementScore(IQueryable<Score> scores)
+        // Increment both Points and Attempts when the answer is right; increment just attempts after wrong answer.
+        public void IncrementScore(IQueryable<Score> scores, bool answer)
         {
-            if (scores.Any())
+            if (answer)
             {
                 scores.First().Points += 1;
-                scores.First().Attempts += 1;
-                context.SaveChanges();
             }
-        }
-
-        public void IncrementAttempts(IQueryable<Score> scores)
-        {
-            if (scores.Any())
-            {
-                scores.First().Attempts += 1;
-                context.SaveChanges();
-            }
+            scores.First().Attempts += 1;
+            context.SaveChanges();
         }
 
         // On page load, check if the user is logged in, return their score.  If they are not logged in return blank Score object.
@@ -113,31 +103,29 @@ namespace STL_Neighborhood_Guesser.Services
         public Score ProcessScore()
         {
             string userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+ 
             if (userId != null)
             {
                 IQueryable<Score> scores = context.Scores.Where(x => x.UserId == userId);
                 // If the user doesn't have a score in the table yet, add them
-                if (!scores.Any())
-                {
-
-                    Score newUserScore = new Score()
-                    {
-                        UserId = userId,
-                        Points = 0,
-                        Attempts = 0
-                    };
-                    context.Scores.Add(newUserScore);
-                    context.SaveChanges();
-
-                    return newUserScore;
-                }
-
-                Score userScore = context.Scores.Where(x => x.UserId == userId).First();
-
-                return userScore;
+                return !scores.Any() ? ProcessNewUserScore(userId) : scores.First();
             }
 
             return new Score();
+        }
+
+        public Score ProcessNewUserScore(String userId)
+        {
+            Score newUserScore = new Score()
+            {
+                UserId = userId,
+                Points = 0,
+                Attempts = 0
+            };
+            context.Scores.Add(newUserScore);
+            context.SaveChanges();
+
+            return newUserScore;
         }
 
 

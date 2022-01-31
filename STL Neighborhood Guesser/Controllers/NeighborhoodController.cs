@@ -28,7 +28,7 @@ namespace STL_Neighborhood_Guesser.Controllers
         }
 
         [Route("click")]
-        public string ReceiveGuess(double lon, double lat)
+        public bool ReceiveGuess(double lon, double lat)
         {
             return _neighborhoodService.ProcessGuess(lon, lat);
         }

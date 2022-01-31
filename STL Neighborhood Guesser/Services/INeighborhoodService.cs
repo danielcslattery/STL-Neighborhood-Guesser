@@ -11,11 +11,12 @@ namespace STL_Neighborhood_Guesser.Services
 
         public List<Neighborhood> GetHintNeighborhoods();
 
-        public string ProcessGuess(double lon, double lat);
+        public bool ProcessGuess(double lon, double lat);
 
-        public void IncrementScore(IQueryable<Score> scores);
-
-        public void IncrementAttempts(IQueryable<Score> scores);
+        public void IncrementScore(IQueryable<Score> scores, bool answer);
 
         public Score ProcessScore();
+
+        public Score ProcessNewUserScore(string userId);
     }
+}

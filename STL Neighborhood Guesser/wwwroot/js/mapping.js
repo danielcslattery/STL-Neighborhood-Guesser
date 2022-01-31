@@ -118,7 +118,7 @@ async function onNeighborhoodClick(e) {
 		formerGuesses.push(e.target.feature.properties.NHD_NAME)
 		let clickedOn = await checkCliickedNeighborhoods(e.latlng.lng, e.latlng.lat);
 		console.log("Server response to click: ", clickedOn)
-		if (clickedOn == "Correct") {
+		if (clickedOn) {
 			// Reset formerGuesses
 			formerGuesses = [];
 			highlightHints(neighborhoodGroup);
