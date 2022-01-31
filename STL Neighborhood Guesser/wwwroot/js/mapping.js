@@ -19,18 +19,14 @@ map.options.maxZoom = 14;
 // Function calls and Variable Initialization
 let formerGuesses = []
 onStart();
-/*map.on('click', onMapClick);*/
-
 
 // Fuctions
 async function getNeighborhoods() {
-	const response = await fetch('https://localhost:5001/neighborhood/all');
-	const myJson = await response.json(); //extract JSON from the http response
+	response = await fetch('https://localhost:5001/neighborhood/all').then(response => response.json());
 
 	let neighborhoodGroup = L.layerGroup();
 
-
-	L.geoJSON(myJson, {
+	L.geoJSON(response, {
 		onEachFeature: function (feature, layer) {
 			layer.addTo(neighborhoodGroup);
 
@@ -98,16 +94,13 @@ function addInstructionalToolTips() {
 }
 
 async function getScore() {
-	const response = await fetch(`https://localhost:5001/neighborhood/score`);
-	const scoreJson = await response.json();
-	console.log(scoreJson)
+	const response = await fetch(`https://localhost:5001/neighborhood/score`).then(response => response.json());
 
+	if (response.userId) {
+		document.getElementById("points").innerHTML = response.points;
+		document.getElementById("attempts").innerHTML = response.attempts;
+    }
 
-	let pointsEl = document.getElementById("points");
-	pointsEl.innerHTML = scoreJson.points;
-
-	let attemptsEl = document.getElementById("attempts");
-	attemptsEl.innerHTML = scoreJson.attempts;
 }
 
 // When a neighborhood is clicked, turn it red if its not the answer, move to next neighborhood challenge if correct
@@ -117,7 +110,7 @@ async function onNeighborhoodClick(e) {
 	if (hintJson.some(el => el == e.target.feature.properties.NHD_NAME)) {
 		formerGuesses.push(e.target.feature.properties.NHD_NAME)
 		let clickedOn = await checkCliickedNeighborhoods(e.latlng.lng, e.latlng.lat);
-		console.log("Server response to click: ", clickedOn)
+
 		if (clickedOn) {
 			// Reset formerGuesses
 			formerGuesses = [];
@@ -150,17 +143,11 @@ function offNeighborhoodHover(e) {
 }
 
 async function checkCliickedNeighborhoods(lon, lat) {
-	const response = await fetch(`https://localhost:5001/neighborhood/click?lon=${lon}&lat=${lat}`);
-	const responseJson = await response.json();
-
-	return responseJson;
+	return await fetch(`https://localhost:5001/neighborhood/click?lon=${lon}&lat=${lat}`).then(response => response.json());
 }
 
 async function getHintNeighborhoods() {
-	const response = await fetch(`https://localhost:5001/neighborhood/GetHints`);
-	const hintJson = await response.json();
-
-	return hintJson;
+	return await fetch(`https://localhost:5001/neighborhood/GetHints`).then(response => response.json());
 }
 
 async function highlightHints() {
@@ -177,9 +164,8 @@ async function highlightHints() {
         }
 	})
 
-	let promptEl = document.getElementById("prompt");
 	// The first item in the hintJson is the neighborhood prompt. 
-	promptEl.innerHTML = hintJson[0];
+	document.getElementById("prompt").innerHTML = hintJson[0];
 
 }
 
